@@ -5,12 +5,12 @@ WORKDIR /app
 EXPOSE 8082
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+
 WORKDIR /src
-COPY ["netcore/netcore.csproj", "netcore/"]
-RUN dotnet restore "netcore/netcore.csproj"
 COPY . .
-WORKDIR "/src/netcore"
+
 RUN dotnet build "netcore.csproj" -c Release -o /app/build
+
 
 FROM build AS publish
 RUN dotnet publish "netcore.csproj" -c Release -o /app/publish /p:UseAppHost=false
