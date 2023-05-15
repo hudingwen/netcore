@@ -32,6 +32,10 @@ namespace netcore.Controllers
             _logger.LogInformation($"QueryString:{str}");
             StreamReader streamReader = new StreamReader(Request.Body);
             string content = streamReader.ReadToEndAsync().GetAwaiter().GetResult();
+            if(content != null )
+            {
+                content = content.Replace("\n", "");
+            }
             _logger.LogInformation($"body:{content}");
 
             var pushUrl = configuration.GetValue<string>("PushUrl").ToString();
