@@ -32,16 +32,16 @@ namespace netcore.Controllers
             _logger.LogInformation($"QueryString:{str}");
             StreamReader streamReader = new StreamReader(Request.Body);
             string content = streamReader.ReadToEndAsync().GetAwaiter().GetResult();
-            if(content != null )
-            {
-                content = content.Replace("\n", "");
-            }
-            _logger.LogInformation($"body:{content}");
-
+            _logger.LogInformation($"Body:{content}");
+            if (content == null)
+                return;
+            var ls = content.Split('\n');
             var pushUrl = configuration.GetValue<string>("PushUrl").ToString();
+            var frontPage = configuration.GetValue<string>("FrontPage").ToString();
             var httpClient = HttpClientFactory.Create();
 
-            var resBody = httpClient.GetAsync($"{pushUrl}{content}").GetAwaiter().GetResult().Content.ReadAsStream();
+
+            var resBody = httpClient.GetAsync($"{pushUrl}&cardMsg.first={(ls.Length > 0 ? ls[0] : "")}&cardMsg.keyword1={(ls.Length > 1 ? ls[1] : "")}&cardMsg.keyword2={(ls.Length > 2 ? ls[2] : "")}&cardMsg.remark={DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}&cardMsg.url={frontPage}").GetAwaiter().GetResult().Content.ReadAsStream();
 
             StreamReader resReader = new StreamReader(resBody);
             string res = resReader.ReadToEndAsync().GetAwaiter().GetResult();
