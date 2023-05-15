@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Net.Http;
 
 namespace netcore.Controllers
 {
@@ -8,10 +9,12 @@ namespace netcore.Controllers
     public class NightscoutController : ControllerBase
     {
         private readonly ILogger<NightscoutController> _logger;
+        private readonly IConfiguration configuration;
 
-        public NightscoutController(ILogger<NightscoutController> logger)
+        public NightscoutController(ILogger<NightscoutController> logger, IConfiguration _configuration)
         {
             _logger = logger;
+            configuration = _configuration;
         }
 
         [HttpGet]
@@ -31,7 +34,19 @@ namespace netcore.Controllers
             string content = streamReader.ReadToEndAsync().GetAwaiter().GetResult();
             _logger.LogInformation($"body:{content}");
 
-           
+            var pushUrl = configuration.GetValue<string>("PushUrl").ToString();
+            var httpClient = HttpClientFactory.Create();
+
+            var resBody = httpClient.GetAsync($"{pushUrl}{content}").GetAwaiter().GetResult().Content.ReadAsStream();
+
+            StreamReader resReader = new StreamReader(resBody);
+            string res = resReader.ReadToEndAsync().GetAwaiter().GetResult();
+            _logger.LogInformation($"res:{res}");
+
+
+
+
+
         }
     }
 }
