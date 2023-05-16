@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System.Net.Http;
 
 namespace netcore.Controllers
@@ -25,33 +26,42 @@ namespace netcore.Controllers
             _logger.LogInformation($"QueryString:{str}");
         }
         [HttpPost]
-        public void Post()
+        public void Post([FromBody]IFTTT data)
         {
             var nowTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             _logger.LogInformation($"{nowTime}-½øÈënightscout,post");
             var str = Request.QueryString.Value;
             _logger.LogInformation($"{nowTime}-QueryString:{str}");
-            StreamReader streamReader = new StreamReader(Request.Body);
-            string content = streamReader.ReadToEndAsync().GetAwaiter().GetResult();
-            _logger.LogInformation($"{nowTime}-Body:{content}");
-            if (content == null)
+            _logger.LogInformation($"{nowTime}-Body:{JsonConvert.SerializeObject(data)}");
+            if (data == null)
                 return;
-            var ls = content.Split('\n');
+            var ls = data.Value2.Split("\n");
+            if(ls.Length ==2)
+            {
+                data.Value2_1 = ls[0].Replace("BG Now: ","");
+                data.Value2_2 = ls[1].Replace("BG 15m: ", "");
+            }
             var pushUrl = configuration.GetValue<string>("PushUrl").ToString();
             var frontPage = configuration.GetValue<string>("FrontPage").ToString();
             var httpClient = HttpClientFactory.Create();
 
-
-            var resBody = httpClient.GetAsync($"{pushUrl}&cardMsg.first={(ls.Length > 0 ? ls[0] : "")}&cardMsg.keyword1={(ls.Length > 1 ? ls[1].Replace("BG Now: ", "") : "")}&cardMsg.keyword2={(ls.Length > 2 ? ls[2].Replace("BG 15m: ", "") : "")}&cardMsg.remark={nowTime}&cardMsg.url={frontPage}").GetAwaiter().GetResult().Content.ReadAsStream();
+            if ("bwp".Equals(data.Value3))
+                return;
+            var url = $"{pushUrl}&cardMsg.first={data.Value1}&cardMsg.keyword1={data.Value2_1}&cardMsg.keyword2={data.Value2_2}&cardMsg.remark={nowTime}&cardMsg.url={frontPage}";
+            _logger.LogInformation($"{nowTime}-url:{url}");
+            var resBody = httpClient.GetAsync(url).GetAwaiter().GetResult().Content.ReadAsStream();
 
             StreamReader resReader = new StreamReader(resBody);
             string res = resReader.ReadToEndAsync().GetAwaiter().GetResult();
             _logger.LogInformation($"res:{res}");
-
-
-
-
-
         }
+    }
+    public class IFTTT
+    {
+        public string Value1 { get; set; }
+        public string Value2 { get; set; }
+        public string Value2_1 { get; set; }
+        public string Value2_2 { get; set; }
+        public string Value3 { get; set; }
     }
 }
