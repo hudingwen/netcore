@@ -26,13 +26,16 @@ namespace netcore.Controllers
             _logger.LogInformation($"QueryString:{str}");
         }
         [HttpPost]
-        public void Post([FromBody]IFTTT data)
+        public void Post()
         {
             var nowTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             _logger.LogInformation($"{nowTime}-½øÈënightscout,post");
             var str = Request.QueryString.Value;
             _logger.LogInformation($"{nowTime}-QueryString:{str}");
-            _logger.LogInformation($"{nowTime}-Body:{JsonConvert.SerializeObject(data)}");
+            StreamReader streamReader = new StreamReader(Request.Body);
+            string content = streamReader.ReadToEndAsync().GetAwaiter().GetResult();
+            _logger.LogInformation($"{nowTime}-Body:{content}");
+            var data = JsonConvert.DeserializeObject<IFTTT>(content);
             if (data == null)
                 return;
             var ls = data.Value2.Split("\n");
