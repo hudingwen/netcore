@@ -38,7 +38,7 @@ namespace netcore.Controllers
             var data = JsonConvert.DeserializeObject<IFTTT>(content);
             if (data == null)
                 return;
-            data.Value1 = data.Value1.Replace(",", "-");
+            data.Value1 = data.Value1.Replace(",", " -");
             var ls = data.Value2.Split("\n",StringSplitOptions.RemoveEmptyEntries);
             if (ls.Length > 1)
             {
