@@ -38,10 +38,11 @@ namespace netcore.Controllers
             var data = JsonConvert.DeserializeObject<IFTTT>(content);
             if (data == null)
                 return;
-            var ls = data.Value2.Split("\n");
-            if(ls.Length ==2)
+            data.Value1 = data.Value1.Replace(",", "-");
+            var ls = data.Value2.Split("\n",StringSplitOptions.RemoveEmptyEntries);
+            if (ls.Length > 1)
             {
-                data.Value2_1 = ls[0].Replace("BG Now: ","");
+                data.Value2_1 = ls[0].Replace("BG Now: ", "");
                 data.Value2_2 = ls[1].Replace("BG 15m: ", "");
             }
             var pushUrl = configuration.GetValue<string>("PushUrl").ToString();
