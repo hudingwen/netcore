@@ -27,12 +27,13 @@ namespace netcore.Controllers
         [HttpPost]
         public void Post()
         {
-            _logger.LogInformation("进入nightscout,post");
+            var nowTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+            _logger.LogInformation($"{nowTime}-进入nightscout,post");
             var str = Request.QueryString.Value;
-            _logger.LogInformation($"QueryString:{str}");
+            _logger.LogInformation($"{nowTime}-QueryString:{str}");
             StreamReader streamReader = new StreamReader(Request.Body);
             string content = streamReader.ReadToEndAsync().GetAwaiter().GetResult();
-            _logger.LogInformation($"Body:{content}");
+            _logger.LogInformation($"{nowTime}-Body:{content}");
             if (content == null)
                 return;
             var ls = content.Split('\n');
@@ -41,7 +42,7 @@ namespace netcore.Controllers
             var httpClient = HttpClientFactory.Create();
 
 
-            var resBody = httpClient.GetAsync($"{pushUrl}&cardMsg.first={(ls.Length > 0 ? ls[0] : "")}&cardMsg.keyword1={(ls.Length > 1 ? ls[1] : "")}&cardMsg.keyword2={(ls.Length > 2 ? ls[2] : "")}&cardMsg.remark={DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}&cardMsg.url={frontPage}").GetAwaiter().GetResult().Content.ReadAsStream();
+            var resBody = httpClient.GetAsync($"{pushUrl}&cardMsg.first={(ls.Length > 0 ? ls[0] : "")}&cardMsg.keyword1={(ls.Length > 1 ? ls[1].Replace("BG Now: ", "") : "")}&cardMsg.keyword2={(ls.Length > 2 ? ls[2].Replace("BG 15m: ", "") : "")}&cardMsg.remark={nowTime}&cardMsg.url={frontPage}").GetAwaiter().GetResult().Content.ReadAsStream();
 
             StreamReader resReader = new StreamReader(resBody);
             string res = resReader.ReadToEndAsync().GetAwaiter().GetResult();
