@@ -27,7 +27,7 @@ namespace netcore.Controllers
         [HttpPost]
         public void Post()
         {
-            var nowTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+            var nowTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             _logger.LogInformation($"{nowTime}-½øÈënightscout,post");
             var str = Request.QueryString.Value;
             _logger.LogInformation($"{nowTime}-QueryString:{str}");
